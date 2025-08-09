@@ -13,17 +13,25 @@ if (!uri) {
   console.warn("MONGODB_URI is not set. Database features will be disabled until configured.");
 }
 
-let client: any | null = null;
-let promise: Promise<any> | null = null;
+// In serverless, cache the client across invocations to prevent creating too many connections
+const g = globalThis as unknown as {
+  _mongoClient?: any | null;
+  _mongoPromise?: Promise<any> | null;
+};
+
+let client: any | null = g._mongoClient ?? null;
+let promise: Promise<any> | null = g._mongoPromise ?? null;
 
 export function getMongoClient(): Promise<any> {
   if (client) return Promise.resolve(client);
   if (!promise) {
     if (!uri) throw new Error("Missing MONGODB_URI env.");
-  promise = new MongoClient(uri).connect().then((c: any) => {
+    promise = new MongoClient(uri).connect().then((c: any) => {
+      g._mongoClient = c;
       client = c;
       return c;
     });
+    g._mongoPromise = promise;
   }
   return promise!;
 }

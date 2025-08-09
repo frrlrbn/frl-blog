@@ -4,6 +4,11 @@ import { authOptions } from "@/auth";
 import { NextRequest } from "next/server";
 import { ObjectId } from "mongodb";
 
+// Ensure serverless Node.js runtime and disable caching on Vercel
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const slug = searchParams.get("slug");
