@@ -1,4 +1,4 @@
-import { getMongoClient } from "@/lib/mongodb";
+import { getDb, getMongoClient } from "@/lib/mongodb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { NextRequest } from "next/server";
@@ -14,8 +14,7 @@ export async function GET(req: NextRequest) {
   const slug = searchParams.get("slug");
   if (!slug) return Response.json({ comments: [] });
   try {
-    const client = await getMongoClient();
-    const db = client.db();
+  const db = await getDb();
     const docs = await db.collection("comments").find({ slug }).sort({ createdAt: 1 }).toArray();
     // Serialize ObjectIds and Dates for the client
     const comments = docs.map((d: any) => ({
@@ -49,8 +48,7 @@ export async function POST(req: NextRequest) {
   // Guard: only allow replies to root comments (i.e., parent has no parentId)
   if (parent) {
     try {
-      const client = await getMongoClient();
-      const db = client.db();
+  const db = await getDb();
       const p = await db.collection("comments").findOne({ _id: parent });
       if (!p) return new Response("Parent Not Found", { status: 404 });
       if (p.parentId) return new Response("Replies to replies are not allowed", { status: 400 });
@@ -71,8 +69,7 @@ export async function POST(req: NextRequest) {
     ...(parent ? { parentId: parent } : {}),
   };
   try {
-    const client = await getMongoClient();
-    const db = client.db();
+  const db = await getDb();
     await db.collection("comments").insertOne(doc);
     return Response.json({ ok: true });
   } catch (e) {
@@ -97,8 +94,7 @@ export async function DELETE(req: NextRequest) {
     return new Response("Bad Request", { status: 400 });
   }
   try {
-    const client = await getMongoClient();
-    const db = client.db();
+  const db = await getDb();
     const doc = await db.collection("comments").findOne({ _id });
     if (!doc) return new Response("Not Found", { status: 404 });
     const sessionId = user?.id || user?.email;

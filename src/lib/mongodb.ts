@@ -36,6 +36,12 @@ export function getMongoClient(): Promise<any> {
   return promise!;
 }
 
+export async function getDb(name?: string): Promise<any> {
+  const client = await getMongoClient();
+  const dbName = name || process.env.MONGODB_DB_NAME || process.env.MONGODB_DB || "blog";
+  return client.db(dbName);
+}
+
 export type CommentDoc = {
   _id?: any;
   slug: string;
