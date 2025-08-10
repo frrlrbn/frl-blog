@@ -35,15 +35,12 @@ export function getMongoClient(): Promise<any> {
       // Conservative pool for serverless
       maxPoolSize: 5,
       minPoolSize: 0,
-      // Keep connections alive between invocations
-      keepAlive: true,
       // Faster failover when network is blocked
       serverSelectionTimeoutMS: 8000,
       appName: process.env.MONGODB_APP_NAME || "frl-blog",
     };
     if (process.env.MONGODB_TLS_INSECURE === "1") {
-      opts.tlsAllowInvalidCertificates = true;
-      opts.tlsInsecure = true;
+            opts.tlsAllowInvalidCertificates = true;
     }
     promise = new MongoClient(uri, opts).connect().then((c: any) => {
       g._mongoClient = c;
