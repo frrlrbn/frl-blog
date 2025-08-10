@@ -1,7 +1,7 @@
 ---
 title: "Hello World"
 slug: hello-world
-excerpt: "Perkenalan blog minimalis hitam-putih dengan Next.js, Markdown, dan Tailwind CSS."
+excerpt: "Welcome to My Blog Page!"
 date: 2025-08-01
 thumbnail: "/images/hello.jpg"
 tags:
