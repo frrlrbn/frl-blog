@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { FaGoogle, FaGithub } from "react-icons/fa6";
 import type { Session } from "next-auth";
 
 type CommentItem = {
@@ -122,50 +123,73 @@ export default function Comments({ slug }: { slug: string }) {
     return !!sid && sid === c.author?.id;
   };
 
-  const ReplyBox = ({ parentId }: { parentId: string }) => (
-    <div className="mt-2 pl-8">
-      <textarea
-        value={replyTextMap[parentId] ?? ""}
-        onChange={(e) => setReplyTextMap((m) => ({ ...m, [parentId]: e.target.value }))}
-        placeholder="Write a reply..."
-        maxLength={MAX_LEN}
-        className="w-full h-20 p-3 text-sm rounded-md resize-none border border-black/15 dark:border-white/15 bg-transparent outline-none focus:ring-1 focus:ring-black/20 dark:focus:ring-white/20"
-      />
-      <div className="mt-1 text-xs text-right">
-        <span
-          className={(() => {
-            const len = (replyTextMap[parentId] ?? "").length;
-            return len >= MAX_LEN
-              ? "text-red-500"
-              : len >= 450
-              ? "text-yellow-600 dark:text-yellow-400"
-              : "opacity-60";
-          })()}
-        >
-          {(replyTextMap[parentId] ?? "").length}/{MAX_LEN}
-        </span>
+  const ReplyBox = ({ parentId }: { parentId: string }) => {
+    const taRef = useRef<HTMLTextAreaElement | null>(null);
+    const value = replyTextMap[parentId] ?? "";
+
+    const autoResize = () => {
+      const ta = taRef.current;
+      if (!ta) return;
+      ta.style.height = "0px";
+      ta.style.height = Math.min(200, ta.scrollHeight) + "px"; // cap growth for UX
+    };
+
+    useEffect(() => {
+      autoResize();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [value]);
+
+    return (
+      <div className="mt-2 pl-8">
+        <textarea
+          ref={taRef}
+          value={value}
+          onChange={(e) => setReplyTextMap((m) => ({ ...m, [parentId]: e.target.value }))}
+          onInput={autoResize}
+          placeholder="Write a reply..."
+          aria-label="Write a reply"
+          inputMode="text"
+          autoComplete="off"
+          spellCheck
+          maxLength={MAX_LEN}
+          className="w-full min-h-24 sm:h-20 p-4 sm:p-3 text-base sm:text-sm leading-7 sm:leading-6 rounded-lg resize-none overflow-hidden border border-black/15 dark:border-white/15 bg-black/[0.03] dark:bg-white/[0.04] outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20"
+        />
+        <div className="mt-1 text-xs text-left sm:text-right">
+          <span
+            className={(() => {
+              const len = value.length;
+              return len >= MAX_LEN
+                ? "text-red-500"
+                : len >= 450
+                ? "text-yellow-600 dark:text-yellow-400"
+                : "opacity-60";
+            })()}
+          >
+            {value.length}/{MAX_LEN}
+          </span>
+        </div>
+        <div className="flex gap-2 mt-2">
+          <button
+            disabled={
+              loading ||
+              !value.trim() ||
+              value.trim().length > MAX_LEN
+            }
+            onClick={() => { submitReply(parentId); }}
+            className="text-sm px-3 py-2 sm:py-1.5 rounded-md border border-black/15 dark:border-white/15 hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-50"
+          >
+            Reply
+          </button>
+          <button
+            onClick={() => { setReplyTo(null); setReplyTextMap((m) => ({ ...m, [parentId]: "" })); }}
+            className="text-sm px-3 py-2 sm:py-1.5 rounded-md border border-black/15 dark:border-white/15 hover:bg-black/5 dark:hover:bg-white/10"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
-      <div className="flex gap-2 mt-2">
-        <button
-          disabled={
-            loading ||
-            !(replyTextMap[parentId] ?? "").trim() ||
-            (replyTextMap[parentId] ?? "").trim().length > MAX_LEN
-          }
-          onClick={() => { submitReply(parentId); }}
-          className="text-sm px-3 py-1.5 rounded-md border border-black/15 dark:border-white/15 hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-50"
-        >
-          Reply
-        </button>
-        <button
-          onClick={() => { setReplyTo(null); setReplyTextMap((m) => ({ ...m, [parentId]: "" })); }}
-          className="text-sm px-3 py-1.5 rounded-md border border-black/15 dark:border-white/15 hover:bg-black/5 dark:hover:bg-white/10"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <section className="space-y-4">
@@ -205,8 +229,20 @@ export default function Comments({ slug }: { slug: string }) {
         <div className="text-sm">
           <p className="opacity-70">Sign in to comment</p>
           <div className="flex gap-2 mt-2">
-            <button onClick={() => signIn("google")} className="px-3 py-1.5 border border-black/15 dark:border-white/15 rounded-md">Google</button>
-            <button onClick={() => signIn("github")} className="px-3 py-1.5 border border-black/15 dark:border-white/15 rounded-md">GitHub</button>
+            <button
+              onClick={() => signIn("google")}
+              className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium border border-black/15 dark:border-white/15 bg-white text-neutral-900 hover:bg-neutral-50 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 dark:bg-white dark:text-neutral-900"
+            >
+              <FaGoogle className="text-[#000000]" />
+              Google
+            </button>
+            <button
+              onClick={() => signIn("github")}
+              className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium border border-black/15 dark:border-white/15 bg-neutral-900 text-white hover:bg-black shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+            >
+              <FaGithub />
+              GitHub
+            </button>
           </div>
         </div>
       )}
@@ -270,10 +306,16 @@ export default function Comments({ slug }: { slug: string }) {
                   {isOpen ? (
                     <ul className="mt-3 space-y-3">
                       {replies.map((r) => (
-                  <li key={r._id} className="relative pl-8">
-                    {/* Thread line + connector dot */}
-                    <span aria-hidden className="pointer-events-none absolute left-2 top-0 bottom-0 w-px bg-black/10 dark:bg-white/10" />
-                    <span aria-hidden className="pointer-events-none absolute left-[7px] top-3 size-2 rounded-full bg-black/30 dark:bg-white/30" />
+                  <li key={r._id} className="relative pl-12">
+                    {/* Curved thread line */}
+                    <svg
+                      aria-hidden
+                      className="pointer-events-none absolute left-0 top-0 h-full w-10 text-black/20 dark:text-white/20"
+                      viewBox="0 0 40 100"
+                      preserveAspectRatio="none"
+                    >
+                      <path d="M 12 0 v 24 q 0 8 8 8 h 12" fill="none" stroke="currentColor" strokeWidth="1" />
+                    </svg>
                     <div className="rounded-md border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.03] p-3">
                       <div className="flex items-center gap-2">
                         {r.author?.image ? (

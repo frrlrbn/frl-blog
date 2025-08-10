@@ -25,7 +25,7 @@ export default function PostListItem({
   return (
     <article className="flex flex-col md:flex-row gap-3 md:gap-4">
       {thumbnail ? (
-        <Link href={`/blog/${slug}`} className="block">
+        <Link href={`/p/${slug}`} className="block">
           <div className="relative w-full aspect-[16/9] overflow-hidden rounded-md border border-black/10 dark:border-white/10 md:w-48 md:h-38 md:aspect-auto">
             <Image
               src={thumbnail}
@@ -40,7 +40,7 @@ export default function PostListItem({
       ) : null}
       <div className="space-y-1 min-w-0">
         <h2 className="text-lg font-semibold">
-          <Link href={`/blog/${slug}`} className="hover:underline underline-offset-4 line-clamp-1">
+          <Link href={`/p/${slug}`} className="hover:underline underline-offset-4 line-clamp-1">
             {title}
           </Link>
         </h2>
