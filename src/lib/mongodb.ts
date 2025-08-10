@@ -26,7 +26,26 @@ export function getMongoClient(): Promise<any> {
   if (client) return Promise.resolve(client);
   if (!promise) {
     if (!uri) throw new Error("Missing MONGODB_URI env.");
-    promise = new MongoClient(uri).connect().then((c: any) => {
+    // Prefer stable Atlas defaults and explicit TLS
+    const opts: any = {
+      // Use Stable API for Atlas
+      serverApi: { version: "1", strict: false, deprecationErrors: false },
+      // TLS is implicit for mongodb+srv, but set true explicitly for clarity
+      tls: true,
+      // Conservative pool for serverless
+      maxPoolSize: 5,
+      minPoolSize: 0,
+      // Keep connections alive between invocations
+      keepAlive: true,
+      // Faster failover when network is blocked
+      serverSelectionTimeoutMS: 8000,
+      appName: process.env.MONGODB_APP_NAME || "frl-blog",
+    };
+    if (process.env.MONGODB_TLS_INSECURE === "1") {
+      opts.tlsAllowInvalidCertificates = true;
+      opts.tlsInsecure = true;
+    }
+    promise = new MongoClient(uri, opts).connect().then((c: any) => {
       g._mongoClient = c;
       client = c;
       return c;
@@ -40,6 +59,16 @@ export async function getDb(name?: string): Promise<any> {
   const client = await getMongoClient();
   const dbName = name || process.env.MONGODB_DB_NAME || process.env.MONGODB_DB || "blog";
   return client.db(dbName);
+}
+
+export async function pingDb(): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const db = await getDb();
+    await db.command({ ping: 1 });
+    return { ok: true };
+  } catch (e: any) {
+    return { ok: false, error: e?.message || String(e) };
+  }
 }
 
 export type CommentDoc = {

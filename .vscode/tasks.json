@@ -8,6 +8,12 @@
 			"isBackground": true,
 			"problemMatcher": [],
 			"group": "build"
+		},
+		{
+			"label": "Build Next.js",
+			"type": "shell",
+			"command": "npm run build",
+			"group": "build"
 		}
 	]
 }
