@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
+import BlurAvatar from "@/components/BlurAvatar";
 import { FaGoogle, FaGithub } from "react-icons/fa6";
 import type { Session } from "next-auth";
 
@@ -21,14 +22,20 @@ export default function Comments({ slug }: { slug: string }) {
   const [commentText, setCommentText] = useState("");
   const [replyTextMap, setReplyTextMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; open: boolean } | null>(null);
   const [expandedReplies, setExpandedReplies] = useState<Record<string, boolean>>({});
 
   const fetchComments = async () => {
-    const res = await fetch(`/api/comments?slug=${encodeURIComponent(slug)}`);
-    const json = await res.json();
-    setComments(json.comments ?? []);
+    setFetching(true);
+    try {
+      const res = await fetch(`/api/comments?slug=${encodeURIComponent(slug)}`);
+      const json = await res.json();
+      setComments(json.comments ?? []);
+    } finally {
+      setFetching(false);
+    }
   };
 
   useEffect(() => { fetchComments(); }, [slug]);
@@ -199,8 +206,7 @@ export default function Comments({ slug }: { slug: string }) {
         <div className="space-y-2">
           <div className="flex items-center gap-3 text-sm">
             {session.user?.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={session.user.image} alt="avatar" className="size-6 rounded-full" />
+              <BlurAvatar src={session.user.image} alt="avatar" className="size-6 rounded-full" />
             ) : null}
             <span className="opacity-70">{session.user?.name ?? session.user?.email}</span>
             <button onClick={() => signOut()} className="ml-auto underline opacity-70 hover:opacity-100">Sign out</button>
@@ -247,13 +253,17 @@ export default function Comments({ slug }: { slug: string }) {
         </div>
       )}
 
-      <ul className="space-y-4">
-        {roots.map((c) => (
+      {fetching ? (
+        <div className="rounded-md border border-black/15 dark:border-white/15 bg-black/[0.03] dark:bg-white/[0.04] p-6 flex items-center justify-center min-h-24">
+          <PixelDotsLoader />
+        </div>
+      ) : (
+        <ul className="space-y-4">
+          {roots.map((c) => (
           <li key={c._id} className="text-sm">
             <div className="flex items-center gap-2">
               {c.author?.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={c.author.image!} alt="avatar" className="size-6 rounded-full" />
+                <BlurAvatar src={c.author.image!} alt="avatar" className="size-6 rounded-full" />
               ) : null}
               <span className="font-medium">{c.author?.name ?? "Anon"}</span>
               <span className="opacity-60">{relativeTime(c.createdAt)}</span>
@@ -319,8 +329,7 @@ export default function Comments({ slug }: { slug: string }) {
                     <div className="rounded-md border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.03] p-3">
                       <div className="flex items-center gap-2">
                         {r.author?.image ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={r.author.image!} alt="avatar" className="size-5 rounded-full" />
+                          <BlurAvatar src={r.author.image!} alt="avatar" className="size-5 rounded-full" />
                         ) : null}
                         <span className="font-medium">{r.author?.name ?? "Anon"}</span>
                         <span className="text-[11px] px-1.5 py-0.5 rounded border border-black/15 dark:border-white/15 bg-black/5 dark:bg-white/10 text-black/70 dark:text-white/70">↳ to {c.author?.name ?? "Anon"}</span>
@@ -353,8 +362,9 @@ export default function Comments({ slug }: { slug: string }) {
               );
             })()}
           </li>
-        ))}
-      </ul>
+          ))}
+        </ul>
+      )}
 
       {/* Confirm delete modal */}
       {confirmDelete?.open ? (
@@ -380,5 +390,36 @@ export default function Comments({ slug }: { slug: string }) {
         </div>
       ) : null}
     </section>
+  );
+}
+
+function PixelDotsLoader() {
+  const dots = Array.from({ length: 32 });
+  return (
+    <div className="text-black/70 dark:text-white" aria-label="Loading comments" role="status">
+      <div
+        className="grid grid-cols-8 gap-1"
+        style={{ imageRendering: "pixelated" as any }}
+      >
+        {dots.map((_, i) => (
+          <span
+            key={i}
+            className="block"
+            style={{
+              width: 8,
+              height: 8,
+              background: "currentColor",
+              animation: `pixelPulse 1.1s ease-in-out ${i * 0.05}s infinite` as any,
+            }}
+          />
+        ))}
+      </div>
+      <style jsx>{`
+        @keyframes pixelPulse {
+          0%, 100% { opacity: 0.25; transform: translateY(0); }
+          50% { opacity: 0.9; transform: translateY(-1px); }
+        }
+      `}</style>
+    </div>
   );
 }

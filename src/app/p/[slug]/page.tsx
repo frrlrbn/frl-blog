@@ -3,9 +3,11 @@ import ShareButtons from "@/components/ShareButtons";
 import Comments from "@/components/Comments";
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
+import BlurImage from "@/components/BlurImage";
+import BlurAvatar from "@/components/BlurAvatar";
 import Script from "next/script";
 import { notFound } from "next/navigation";
+import { FaRegCalendarAlt, FaRegEye } from "react-icons/fa";
 
 export async function generateStaticParams() {
   return getAllPosts().map((p) => ({ slug: p.slug }));
@@ -46,13 +48,19 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           <img src="/images/author.jpg" alt="Muhammad Farrel Rabbani" className="size-8 rounded-full" />
           <span className="font-medium">Muhammad Farrel Rabbani</span>
           <span>•</span>
-          <time dateTime={new Date(post.date).toISOString()}>{dateStr}</time>
+          <span className="inline-flex items-center gap-1.5">
+            <FaRegCalendarAlt className="size-4 opacity-70" aria-hidden />
+            <time dateTime={new Date(post.date).toISOString()}>{dateStr}</time>
+          </span>
           <span>•</span>
-          <span>{readingMinutes} min read</span>
+          <span className="inline-flex items-center gap-1.5">
+            <FaRegEye className="size-4 opacity-70" aria-hidden />
+            <span>{readingMinutes} min read</span>
+          </span>
         </div>
         {post.thumbnail ? (
           <div className="mt-4 sm:mt-6">
-            <Image
+            <BlurImage
               src={post.thumbnail}
               alt={post.title}
               width={1200}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import BlurImage from "@/components/BlurImage";
 
 export default function PostListItem({
   title,
@@ -27,7 +27,7 @@ export default function PostListItem({
       {thumbnail ? (
         <Link href={`/p/${slug}`} className="block">
           <div className="relative w-full aspect-[16/9] overflow-hidden rounded-md border border-black/10 dark:border-white/10 md:w-48 md:h-38 md:aspect-auto">
-            <Image
+            <BlurImage
               src={thumbnail}
               alt={title}
               fill
