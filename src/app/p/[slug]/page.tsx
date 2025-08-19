@@ -7,7 +7,7 @@ import BlurImage from "@/components/BlurImage";
 import BlurAvatar from "@/components/BlurAvatar";
 import Script from "next/script";
 import { notFound } from "next/navigation";
-import { FaRegCalendarAlt, FaRegEye } from "react-icons/fa";
+import { FaRegCalendarAlt, FaRegClock } from "react-icons/fa";
 
 export async function generateStaticParams() {
   return getAllPosts().map((p) => ({ slug: p.slug }));
@@ -16,9 +16,37 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const post = getPostBySlug(slug);
+  const title = post?.title ?? "Blog";
+  const description = post?.excerpt ?? "";
+  const url = `https://blog.farrel.id/p/${slug}`;
+  const ogImage = post?.thumbnail ?? "/images/placeholder.png";
+  const publishedTime = post ? new Date(post.date).toISOString() : undefined;
+  const tags = post?.tags ?? [];
   return {
-    title: post?.title ?? "Blog",
-    description: post?.excerpt,
+    title,
+    description,
+    alternates: { canonical: url },
+  keywords: tags,
+    openGraph: {
+      type: "article",
+      url,
+      title,
+      description,
+      siteName: "Farrel's Blog",
+      publishedTime,
+      authors: ["Muhammad Farrel Rabbani"],
+      tags,
+      images: [{ url: ogImage }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+      creator: "@frrlrbn",
+      site: "@frrlrbn",
+    },
+    robots: { index: true, follow: true },
   };
 }
 
@@ -31,9 +59,38 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   const dateStr = new Date(post.date).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "2-digit" });
   return (
     <main className="mx-auto max-w-[72ch] px-4 py-10">
+      {/* JSON-LD Article schema for SEO */}
+      <Script id="ld-article" type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          headline: post.title,
+          description: post.excerpt,
+          image: post.thumbnail,
+          keywords: (post.tags ?? []).join(", "),
+          about: (post.tags ?? []).map((t: string) => ({ "@type": "Thing", name: t })),
+          datePublished: new Date(post.date).toISOString(),
+          dateModified: new Date(post.date).toISOString(),
+          author: {
+            "@type": "Person",
+            name: "Muhammad Farrel Rabbani",
+          },
+          publisher: {
+            "@type": "Organization",
+            name: "Farrel's Blog",
+            logo: {
+              "@type": "ImageObject",
+              url: "https://blog.farrel.id/images/logo.png",
+            },
+          },
+          mainEntityOfPage: {
+            "@type": "WebPage",
+            "@id": `https://blog.farrel.id/p/${slug}`,
+          },
+        })}
+      </Script>
       {/* Ad script: loaded after interactive to avoid blocking rendering */}
-      <Script id="ad-network" src="https://jewelsobstructionerosion.com/66/9c/91/669c913da056274a9ef888b18b55cb88.js" strategy="afterInteractive" />
-      <Script id="ad-network-2" src="https://jewelsobstructionerosion.com/e6/be/9f/e6be9f1e9ac11bd757d8d1b91fa7705b.js" strategy="afterInteractive" />
+      <Script id="ad-network" src="https://jewelsobstructionerosion.com/e6/be/9f/e6be9f1e9ac11bd757d8d1b91fa7705b.js" strategy="afterInteractive" />
       {/* Header */}
       <div className="mb-6">
         <Link href="/" className="inline-flex items-center gap-2 text-sm opacity-70 hover:opacity-100">
@@ -54,7 +111,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           </span>
           <span>•</span>
           <span className="inline-flex items-center gap-1.5">
-            <FaRegEye className="size-4 opacity-70" aria-hidden />
+            <FaRegClock className="size-4 opacity-70" aria-hidden />
             <span>{readingMinutes} min read</span>
           </span>
         </div>

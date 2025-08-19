@@ -24,6 +24,31 @@ const montserrat = localFont({
 export const metadata: Metadata = {
   title: "Muhammad Farrel Rabbani | Blog",
   description: "A place to share my thoughts, technical notes, and design ideas.",
+  metadataBase: new URL("https://blog.farrel.id"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    url: "https://blog.farrel.id/",
+    siteName: "Farrel's Blog",
+    title: "Muhammad Farrel Rabbani | Blog",
+    description: "A place to share my thoughts, technical notes, and design ideas.",
+    images: [{ url: "/images/author.jpg" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@frrlrbn",
+    creator: "@frrlrbn",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
 };
 
 export default function RootLayout({
