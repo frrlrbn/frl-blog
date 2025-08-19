@@ -11,6 +11,7 @@ tags:
   - wpw
   - wpw.my.id
   - penghitaman
+  - web penghitaman waifu
 ---
 
 Ingin melihat waifumu hitam? atau waifu teman mu? Web Penghitaman Waifu adalah jawaban untukmu!
@@ -19,7 +20,7 @@ Ingin melihat waifumu hitam? atau waifu teman mu? Web Penghitaman Waifu adalah j
 
 Web Penghitaman Waifu atau disingat WPW adalah platform inovatif yang menggunakan teknologi AI untuk mengubah tampilan karakter anime (waifu) menjadi versi dengan warna kulit yang lebih gelap.
 
-## 1. Buka Situs: https://wpw.my.id Di Browser Kamu
+## 1. Buka Situs [WPW](https://wpw.my.id) Di Browser Kamu
 <figure>
   <img
     src="/images/wpw-1.png"
@@ -101,7 +102,7 @@ Saya akan coba menggunakan filter yang paling umum, yaitu coklat.
 </figure>
 Setelah menunggu loading sesaat, proses penghitaman sudah selesai! kamu bisa langsung download atau bisa membuat sticker secara langsung pada website ini
 
-## 5. Membuat Sticker Denagn Hasil Penghitaman (Optional)
+## 5. Membuat Sticker Dengan Hasil Penghitaman (Optional)
 <figure>
   <img
     src="/images/wpw-5.png"
@@ -139,13 +140,16 @@ Pada tools sticker, kamu bisa melakukan banyak penyesuaian seperti menambahkan t
 - Pastikan wajah karakter terlihat jelas dan detail.
 - Jangan mengupload gambar yang memiliki unsur pornografi atau gambar dengan wajah makhluk hidup asli.
 
+## Kunjungi Web Penghitaman Waifu!
+Siap untuk mencoba sendiri? Langsung kunjungi [**wpw.my.id**](https://wpw.my.id) dan mulai menghitamkan karakter anime yang kamu mau!
+
 ## FAQ
 
-- Kenapa transformasi nya stuck di 85%?\
+- **Kenapa transformasi nya stuck di 85%?**\
 Transformasi dapat stuck pada 85% karena terjadi error pada saat generating image, atau anda mengupload image dengan konten dewasa, solusinya adalah cobalah untuk refresh website dan menambahkan image nya lagi.
-- Apakah bisa untuk menghitamkan selain karakter anime?\
+- **Apakah bisa untuk menghitamkan selain karakter anime?**\
 Untuk sekarang hanya optimal untuk menghitamkan karakter anime saja, mau itu waifu ataupun husbu.
-- Dengan apa website ini dibuat?\
+- **Dengan apa website ini dibuat?**\
 Website ini dibuat menggunakan Next.Js, styling dengan Tailwindcss dan Framer Motion. untuk backend menggunakan Node.Js dan API dari Gemini 2.0 Flash.
 
 ## Penutup

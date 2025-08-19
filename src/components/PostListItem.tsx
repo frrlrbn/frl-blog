@@ -26,7 +26,7 @@ export default function PostListItem({
     <article className="flex flex-col md:flex-row gap-3 md:gap-4">
       {thumbnail ? (
         <Link href={`/p/${slug}`} className="block">
-          <div className="relative w-full aspect-[16/9] overflow-hidden rounded-md border border-black/10 dark:border-white/10 md:w-48 md:h-38 md:aspect-auto">
+          <div className="relative w-full aspect-[16/9] overflow-hidden rounded-md  md:w-48 md:h-38 md:aspect-auto">
             <BlurImage
               src={thumbnail}
               alt={title}
