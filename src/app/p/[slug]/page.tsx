@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       url,
       title,
       description,
-      siteName: "Farrel's Blog",
+      siteName: "Muhammad Farrel Rabbani | Blog",
       publishedTime,
       authors: ["Muhammad Farrel Rabbani"],
       tags,
@@ -77,7 +77,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           },
           publisher: {
             "@type": "Organization",
-            name: "Farrel's Blog",
+            name: "Muhammad Farrel Rabbani | Blog",
             logo: {
               "@type": "ImageObject",
               url: "https://blog.farrel.id/images/logo.png",

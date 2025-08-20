@@ -1,5 +1,6 @@
 import { getAllPosts } from "@/lib/markdown";
 import PostList from "@/components/PostList";
+import PixelatedWelcome from "@/components/PixelatedWelcome";
 import { FaGithub, FaLinkedin, FaInstagram, FaGlobe } from "react-icons/fa";
 import { MdOutlineEmail } from "react-icons/md";
 
@@ -8,7 +9,7 @@ export default function Home() {
   return (
     <main className="mx-auto max-w-[72ch] px-4 py-12">
       <section className="space-y-2 mb-10">
-        <h1 className="text-4xl font-semibold">FARREL'S BLOG POSTS</h1>
+        <PixelatedWelcome />
         <p className="text-sm text-black/70 dark:text-white/70">A place to share my thoughts, technical notes, and design ideas.</p>
         {/* Social and website icons (react-icons) — update hrefs to your profiles as needed */}
         <div className="flex items-center gap-3 pt-1">

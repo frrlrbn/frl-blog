@@ -1,7 +1,4 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+module.exports = {
   trailingSlash: false,
   poweredByHeader: false,
   compress: true,
@@ -54,12 +51,10 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/blog/:slug",
-        destination: "/p/:slug",
+        source: '/blog/:slug',
+        destination: '/p/:slug',
         permanent: true,
       },
     ];
   },
 };
-
-export default nextConfig;
