@@ -52,6 +52,12 @@ export default function Comments({ slug }: { slug: string }) {
       if (res.ok) {
         setCommentText("");
         await fetchComments();
+      } else if (res.status === 429) {
+        // Rate limit exceeded
+        const json = await res.json();
+        alert(json.message || "You have reached the maximum number of comments per day. Please try again later.");
+      } else {
+        alert("Failed to post comment. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -72,6 +78,12 @@ export default function Comments({ slug }: { slug: string }) {
         setReplyTextMap((m) => ({ ...m, [parentId]: "" }));
         setReplyTo(null);
         await fetchComments();
+      } else if (res.status === 429) {
+        // Rate limit exceeded
+        const json = await res.json();
+        alert(json.message || "You have reached the maximum number of comments per day. Please try again later.");
+      } else {
+        alert("Failed to post reply. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -127,6 +139,10 @@ export default function Comments({ slug }: { slug: string }) {
 
   const canDelete = (c: CommentItem) => {
     const sid = (session?.user as any)?.id || session?.user?.email;
+    const userEmail = session?.user?.email;
+    // Admin can delete any comment
+    if (userEmail === "farrelrabbani88@gmail.com") return true;
+    // Owner can delete their own comment
     return !!sid && sid === c.author?.id;
   };
 

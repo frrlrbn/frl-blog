@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { NextRequest } from "next/server";
 import { ObjectId } from "mongodb";
+import { checkCommentRateLimit, isAdmin } from "@/lib/rateLimit";
+import { filterBadWords, containsBadWords } from "@/lib/wordFilter";
 
 // Ensure serverless Node.js runtime and disable caching on Vercel
 export const runtime = "nodejs";
@@ -37,13 +39,41 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.email && !(session?.user as any)?.id) {
     return new Response("Unauthorized", { status: 401 });
   }
+  
+  // Rate limiting check
+  const user = session!.user as any;
+  const userId = user?.id || user?.email || "unknown";
+  
+  const rateLimit = checkCommentRateLimit(userId);
+  if (!rateLimit.allowed) {
+    const resetDate = new Date(rateLimit.resetAt).toLocaleString();
+    return new Response(
+      JSON.stringify({ 
+        error: "Rate limit exceeded", 
+        message: `You have reached the maximum number of comments per day. Please try again after ${resetDate}.`,
+        resetAt: rateLimit.resetAt 
+      }), 
+      { 
+        status: 429,
+        headers: { "Content-Type": "application/json" }
+      }
+    );
+  }
+  
   const body = await req.json();
   const { slug, content, parentId } = body ?? {};
   if (!slug || !content?.trim()) return new Response("Bad Request", { status: 400 });
   const trimmed = String(content).trim();
   if (trimmed.length > 500) return new Response("Content too long", { status: 413 });
-  // At this point session is guaranteed by the guard above
-  const user = session!.user as any;
+  
+  // Filter bad words from content
+  const filteredContent = filterBadWords(trimmed);
+  
+  // Log if bad words were detected (optional, for monitoring)
+  if (containsBadWords(trimmed)) {
+    console.log(`Bad words detected in comment from user ${userId}`);
+  }
+  
   const parent = parentId ? (() => { try { return new ObjectId(parentId); } catch { return null; } })() : null;
   // Guard: only allow replies to root comments (i.e., parent has no parentId)
   if (parent) {
@@ -59,7 +89,7 @@ export async function POST(req: NextRequest) {
   }
   const doc = {
     slug,
-  content: trimmed,
+    content: filteredContent, // Use filtered content instead of trimmed
     createdAt: new Date(),
     author: {
       id: user?.id || user?.email || "unknown",
@@ -97,10 +127,18 @@ export async function DELETE(req: NextRequest) {
   const db = await getDb();
     const doc = await db.collection("comments").findOne({ _id });
     if (!doc) return new Response("Not Found", { status: 404 });
+    
     const sessionId = user?.id || user?.email;
-    if (!sessionId || doc.author?.id !== sessionId) {
+    const userEmail = user?.email;
+    
+    // Check if user is admin or the comment owner
+    const isOwner = sessionId && doc.author?.id === sessionId;
+    const hasAdminPrivilege = isAdmin(userEmail);
+    
+    if (!isOwner && !hasAdminPrivilege) {
       return new Response("Forbidden", { status: 403 });
     }
+    
     await db.collection("comments").deleteOne({ _id });
     // Optionally cascade delete replies
     await db.collection("comments").deleteMany({ parentId: _id });
