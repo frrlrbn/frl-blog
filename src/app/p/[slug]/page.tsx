@@ -89,8 +89,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           },
         })}
       </Script>
-      {/* Ad script: loaded after interactive to avoid blocking rendering */}
-      <Script id="ad-network" src="https://jewelsobstructionerosion.com/e6/be/9f/e6be9f1e9ac11bd757d8d1b91fa7705b.js" strategy="afterInteractive" />
+
       {/* Header */}
       <div className="mb-6">
         <Link href="/" className="inline-flex items-center gap-2 text-sm opacity-70 hover:opacity-100">
